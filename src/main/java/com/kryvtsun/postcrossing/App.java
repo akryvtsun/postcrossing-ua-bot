@@ -1,10 +1,10 @@
-package com.kryvtsun;
+package com.kryvtsun.postcrossing;
 
 /**
  * Hello world!
  *
  */
-public class App 
+public class App
 {
     public static void main( String[] args )
     {
