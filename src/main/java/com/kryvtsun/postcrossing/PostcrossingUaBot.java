@@ -1,16 +1,18 @@
 package com.kryvtsun.postcrossing;
 
-import org.json.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.IOException;
-import java.net.*;
-import java.net.http.*;
+final class PostcrossingUaBot extends TelegramLongPollingBot {
+    private final String userName;
+    private final String token;
 
-public class PostcrossingUaBot extends TelegramLongPollingBot {
+    public PostcrossingUaBot(String userName, String token) {
+        this.userName = userName;
+        this.token = token;
+    }
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -29,31 +31,16 @@ public class PostcrossingUaBot extends TelegramLongPollingBot {
     }
 
     private String getUsRate() {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&json"))
-                    .GET()
-                    .build();
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
-
-            JSONArray array = new JSONArray(response.body());
-            JSONObject object = array.getJSONObject(0);
-            double rate = object.getDouble("rate");
-            return String.format("%.2f грн.", rate);
-        } catch (URISyntaxException | IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return String.format("%.2f грн.", new NbuRateSupplier("USD").get());
     }
 
     @Override
     public String getBotUsername() {
-        return "PostcrossingUaBot";
+        return userName;
     }
 
     @Override
     public String getBotToken() {
-        return System.getenv("token");
+        return token;
     }
 }
